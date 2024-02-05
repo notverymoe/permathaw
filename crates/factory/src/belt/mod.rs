@@ -14,5 +14,6 @@ pub struct BeltTrackEntry {
 
 pub struct BeltTrack {
     data: Vec<BeltTrackEntry>,
-    freelist: Vec<u8>,
+    head_freelist: u8,
+    head_data:     u8,
 }
