@@ -45,3 +45,6 @@
 
 mod item;
 pub use item::*;
+
+mod belt;
+pub use belt::*;
