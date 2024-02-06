@@ -1,5 +1,7 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
+use bevy::prelude::Component;
+
 use crate::ItemStack;
 
 pub const BELT_ITEM_SIZE: u8    = 4;
@@ -8,6 +10,7 @@ pub const BELT_DIST_MAX:  u8    = ((BELT_ITEM_MAX - 1) as u8) * BELT_ITEM_SIZE;
 
 pub const BELT_BODY_MAX: usize = BELT_ITEM_MAX - 1;
 
+#[derive(Debug, Clone, Copy, Component)]
 pub struct BeltHead {
     idx_next: u8,
     idx_prev: u8,
@@ -17,16 +20,29 @@ pub struct BeltHead {
 
 impl BeltHead {
 
-    pub fn advance(&mut self) -> bool {
+    pub fn advance_and_squish(&mut self, body: &mut impl AsMut<BeltBody>) {
+        if !self.advance_checked() { return; }
+        if !self.squish(body.as_mut()) { return; }
+        self.advance_unchecked();
+    }
+
+    fn advance_checked(&mut self) -> bool {
+        // TODO OPT inline always (?)
         let (val, overflowed) = self.space.overflowing_sub(1);
         self.space = val.wrapping_add(overflowed as u8);
         overflowed
     }
 
-    pub fn squish(&mut self, body: &mut BeltBody) {
+    fn advance_unchecked(&mut self) {
+        // TODO OPT inline always (?)
+        self.space -= 1;
+    }
+
+    #[inline(never)]
+    fn squish(&mut self, body: &mut BeltBody) -> bool {
         while self.space == 0 {
             if self.idx_next == u8::MAX {
-                return;
+                return false;
             }
 
             let squish = BeltBodyEntry {
@@ -43,16 +59,19 @@ impl BeltHead {
             self.space     = next.space;
             self.count    += 1;
         }
-    }
 
+        true
+    }
 }
 
+#[derive(Debug, Clone, Copy)]
 pub struct BeltBodyEntry {
     idx_next: u8,
     space:    u8,
     stack:    ItemStack,
 }
 
+#[derive(Debug, Clone, Copy, Component)]
 pub struct BeltBody {
     freelist_head: u8,
     data: [BeltBodyEntry; BELT_BODY_MAX],
