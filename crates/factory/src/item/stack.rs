@@ -2,4 +2,5 @@
 
 use core::num::NonZeroU16;
 
+#[derive(Debug, Clone, Copy)]
 pub struct ItemStack(NonZeroU16);
