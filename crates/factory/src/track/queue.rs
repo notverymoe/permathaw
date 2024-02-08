@@ -100,7 +100,7 @@ const fn accumulate_zeros_to_right(v: u64) -> u64 {
     //
     let blsr = v & (v.wrapping_sub(1));
     let shr  = blsr >> 1;
-    let msb  = U64_MSB * (v != 0) as u64;
+    let msb  = if v == 0 { U64_MSB } else { 0 };
     msb | shr
 }
 
