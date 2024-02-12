@@ -2,7 +2,7 @@
 
 use bevy::prelude::Component;
 
-use crate::ItemStack;
+use crate::item::ItemStack;
 
 pub const BELT_ITEM_SIZE: u8    = 4;
 pub const BELT_ITEM_MAX:  usize = 64;

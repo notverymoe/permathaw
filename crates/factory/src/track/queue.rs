@@ -1,10 +1,8 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
-use bevy::prelude::Component;
-
 use super::util::accumulate_zeros_to_right;
 
-#[derive(Clone, Copy, Component, PartialEq, Eq)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 pub struct TrackQueue(u64);
 
 impl TrackQueue {

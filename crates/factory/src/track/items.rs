@@ -1,13 +1,14 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
-use bevy::prelude::Component;
+use crate::{
+    util::{insert_into, remove_from}, 
+    item::ItemStack
+};
 
-use crate::ItemStack;
-
-#[derive(Clone, Copy, Component)]
+#[derive(Clone, Copy)]
 pub struct TrackBufferLength(u8);
 
-#[derive(Clone, Copy, Component)]
+#[derive(Clone, Copy)]
 pub struct TrackBuffer([ItemStack; 64]);
 
 impl TrackBuffer {
@@ -25,21 +26,50 @@ pub struct TrackBufferAccessorMut<'a> {
 
 impl<'a> TrackBufferAccessorMut<'a> {
 
-    pub fn wrap(len: &'a mut TrackBufferLength, buffer: &'a mut TrackBuffer) -> Self {
+    pub fn new(len: &'a mut TrackBufferLength, buffer: &'a mut TrackBuffer) -> Self {
         Self{len: &mut len.0, data: &mut buffer.0}
     }
 
-    pub fn remove(&mut self, idx: usize) -> Option<ItemStack> {
-        if idx > *self.len as usize {
-            return None;
-        }
-        let result = self.data[idx];
-        self.data[idx..].rotate_left(1); // TODO OPT We should just shift
+    pub fn insert(&mut self, idx: usize, v: ItemStack) -> bool {
+        let result = insert_into(self.as_slice_mut(), idx, v);
+        if result { *self.len += 1; }
+        result
+    }
 
-        //unsafe {
-        //    core::ptr::copy(self.data.as_mut_ptr().add(idx+1), self.data.as_mut_ptr().add(idx), self.data.len() - 1 - idx);
-        //}
-        Some(result)
+    pub fn remove(&mut self, idx: usize) -> Option<ItemStack> {
+        let result = remove_from(self.as_slice_mut(), idx);
+        if result.is_some() { *self.len -= 1; }
+        result
+    }
+
+    #[must_use]
+    pub fn get(&self, idx: usize) -> Option<ItemStack> {
+        self.as_slice().get(idx).copied()
+    }
+
+    #[must_use]
+    pub fn get_mut(&mut self, idx: usize) -> Option<&mut ItemStack> {
+        self.as_slice_mut().get_mut(idx)
+    }
+
+    #[must_use]
+    pub fn as_slice(&self) -> &[ItemStack] {
+        &self.data[..(*self.len as usize)]
+    }
+
+    #[must_use]
+    pub fn as_slice_mut(&mut self) -> &mut [ItemStack] {
+        &mut self.data[..(*self.len as usize)]
+    }
+
+    #[must_use]
+    pub fn len(&self) -> usize {
+        *self.len as usize
+    }
+
+    #[must_use]
+    pub fn is_empty(&self) -> bool {
+        *self.len == 0
     }
 
 }
