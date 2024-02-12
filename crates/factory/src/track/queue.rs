@@ -83,14 +83,46 @@ mod test {
         let mut queue = TrackQueue::default();
         assert_eq!(queue.0, u64::MAX);
 
+        // Insert at front
         queue.insert(0);
         assert_eq!(queue.0, !1);
         queue.remove(0);
         assert_eq!(queue.0, u64::MAX);
 
+        // Insert at back
         queue.insert(63);
         assert_eq!(queue.0, !U64_MSB);
         queue.remove(63);
+        assert_eq!(queue.0, u64::MAX);
+
+        // Check advance blocked 1
+        queue.insert(0);
+        queue.advance();
+        assert_eq!(queue.0, !1);
+        queue.remove(0);
+        assert_eq!(queue.0, u64::MAX);
+
+        // Check advance blocked 2
+        queue.insert(0);
+        queue.insert(1);
+        queue.advance();
+        assert_eq!(queue.0, !3);
+        queue.remove(0);
+        assert_eq!(queue.0, !2);
+
+        // Check advance unblocked 1
+        queue.insert(63);
+        queue.advance();
+        assert_eq!(queue.0, !(U64_MSB >> 1));
+        queue.remove(62);
+        assert_eq!(queue.0, u64::MAX);
+
+        // Check advance unblocked 2
+        queue.insert(63);
+        queue.insert(62);
+        queue.advance();
+        assert_eq!(queue.0, !(U64_MSB >> 1));
+        queue.remove(62);
         assert_eq!(queue.0, u64::MAX);
     }
 }
