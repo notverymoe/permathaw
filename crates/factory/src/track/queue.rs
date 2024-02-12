@@ -4,7 +4,7 @@ use bevy::prelude::Component;
 
 use super::util::accumulate_zeros_to_right;
 
-#[derive(Clone, Copy, Component)]
+#[derive(Clone, Copy, Component, PartialEq, Eq)]
 pub struct TrackQueue(u64);
 
 impl TrackQueue {
@@ -41,7 +41,7 @@ impl Default for TrackQueue {
 
 impl core::fmt::Debug for TrackQueue {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        f.debug_tuple("TrackQueue").field(&format!("{:#064b}", self.0)).finish()
+        f.debug_tuple("TrackQueue").field(&format!("{:#066b}", self.0)).finish()
     }
 }
 
@@ -76,53 +76,71 @@ impl<'a> Iterator for TrackQueueIter<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::track::util::U64_MSB;
+
+    const fn conveyor_mask<const N: usize>(pattern: [usize; N]) -> TrackQueue {
+        let mut result = 0;
+        let mut index  = 0;
+        loop {
+            if index >= N { break; }
+            result |= 1 << pattern[index];
+            index += 1;
+        }
+        TrackQueue(!result)
+    }
 
     #[test]
     pub fn test_queue() {
         let mut queue = TrackQueue::default();
-        assert_eq!(queue.0, u64::MAX);
+        assert_eq!(queue, conveyor_mask([]));
 
         // Insert at front
         queue.insert(0);
-        assert_eq!(queue.0, !1);
+        assert_eq!(queue, conveyor_mask([0]));
         queue.remove(0);
-        assert_eq!(queue.0, u64::MAX);
+        assert_eq!(queue, conveyor_mask([]));
 
         // Insert at back
         queue.insert(63);
-        assert_eq!(queue.0, !U64_MSB);
+        assert_eq!(queue, conveyor_mask([63]));
         queue.remove(63);
-        assert_eq!(queue.0, u64::MAX);
+        assert_eq!(queue, conveyor_mask([]));
 
         // Check advance blocked 1
         queue.insert(0);
         queue.advance();
-        assert_eq!(queue.0, !1);
+        assert_eq!(queue, conveyor_mask([0]));
         queue.remove(0);
-        assert_eq!(queue.0, u64::MAX);
+        assert_eq!(queue, conveyor_mask([]));
 
         // Check advance blocked 2
         queue.insert(0);
         queue.insert(1);
         queue.advance();
-        assert_eq!(queue.0, !3);
+        assert_eq!(queue, conveyor_mask([1, 0]));
         queue.remove(0);
-        assert_eq!(queue.0, !2);
+        assert_eq!(queue, conveyor_mask([1]));
+        queue.advance();
+        assert_eq!(queue, conveyor_mask([0]));
+        queue.remove(0);
+        assert_eq!(queue, conveyor_mask([]));
 
         // Check advance unblocked 1
         queue.insert(63);
         queue.advance();
-        assert_eq!(queue.0, !(U64_MSB >> 1));
+        assert_eq!(queue, conveyor_mask([62]));
         queue.remove(62);
-        assert_eq!(queue.0, u64::MAX);
+        assert_eq!(queue, conveyor_mask([]));
 
         // Check advance unblocked 2
         queue.insert(63);
         queue.insert(62);
         queue.advance();
-        assert_eq!(queue.0, !(U64_MSB >> 1));
-        queue.remove(62);
-        assert_eq!(queue.0, u64::MAX);
+        assert_eq!(queue, conveyor_mask([62, 61]));
+        queue.remove(61);
+        assert_eq!(queue, conveyor_mask([62]));
+        queue.advance();
+        assert_eq!(queue, conveyor_mask([61]));
+        queue.remove(61);
+        assert_eq!(queue, conveyor_mask([]));
     }
 }
