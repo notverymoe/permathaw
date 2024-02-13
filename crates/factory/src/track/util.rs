@@ -5,6 +5,7 @@ pub const U64_MSB: u64 = 0x8000_0000_0000_0000;
 /// Shift right by 1, without shifting 0s off the end thus accumulating them 
 /// instead. Shifts in a 1 at the MSB if the value was non-zero, otherwise a 0.
 /// This is used to simulate a conveyor belt.
+#[allow(unused)]
 pub const fn accumulate_zeros_to_right(v: u64) -> u64 {
     // So, let's be honest. This is a weird bit hack, let's break it down.
     //
