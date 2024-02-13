@@ -55,6 +55,13 @@ pub const fn accumulate_zeros_to_right(v: u64) -> u64 {
     // TODO OPT queue will never be zero, high 3 bits reserved and thus always set.
 }
 
+/// Same as [accumulate_zeros_to_right](accumulate_zeros_to_right)
+/// Except, assumes that the bits are always non-zero. This allows
+/// significantly more terse ASM output.
+pub const fn accumulate_zeros_to_right_nonzero_unchecked(v: u64) -> u64 {
+    let blsr = v & (v.wrapping_sub(1));
+    U64_MSB | (blsr >> 1)
+}
 
 #[cfg(test)]
 mod test {

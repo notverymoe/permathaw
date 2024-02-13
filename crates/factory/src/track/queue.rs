@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::util::accumulate_zeros_to_right;
+use super::util::accumulate_zeros_to_right_nonzero_unchecked;
 
 #[derive(Clone, Copy, PartialEq, Eq, Component)]
 pub struct TrackQueue(u64);
@@ -11,7 +11,7 @@ impl TrackQueue {
 
     #[must_use]
     pub const fn next(self) -> Self {
-        Self(accumulate_zeros_to_right(self.0))
+        Self(accumulate_zeros_to_right_nonzero_unchecked(self.0))
     }
 
     #[must_use]
