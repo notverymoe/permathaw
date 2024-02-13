@@ -51,6 +51,8 @@ pub const fn accumulate_zeros_to_right(v: u64) -> u64 {
     let shr  = blsr >> 1;
     let msb  = if v == 0 { 0 } else { U64_MSB }; // OPT this is faster in debug (no panic), and gets optimized terse.
     msb | shr
+
+    // TODO OPT queue will never be zero, high 3 bits reserved and thus always set.
 }
 
 

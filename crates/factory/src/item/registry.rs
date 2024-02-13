@@ -1,6 +1,6 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
-use core::num::NonZeroU16;
+use core::{num::NonZeroU16, fmt::Debug};
 
 use bevy::utils::{Entry, HashMap};
 use nvm_str_id::SmolStr;
@@ -29,6 +29,17 @@ impl Default for ItemRegistryBuilder {
 pub enum ItemRegistryBuilderError {
     AlreadyRegistered(SmolStr, Item, String),
     ExhaustedIds,
+}
+
+impl Debug for ItemRegistryBuilderError {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        match self {
+            Self::AlreadyRegistered(arg0, arg1, arg2) => {
+                write!(f, "ItemRegistry: Item ({arg0}) is already registered as ({arg1:?}) by ({arg2})")
+            },
+            Self::ExhaustedIds => write!(f, "ItemRegistry: All IDs exhausted"),
+        }
+    }
 }
 
 impl ItemRegistryBuilder {

@@ -1,21 +1,17 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
+pub const TRACK_MAX_ITEMS: usize = 60;
+
 mod queue;
 pub use queue::*;
 
-mod items;
-pub use items::*;
+mod buffer;
+pub use buffer::*;
+
+mod connections;
+pub use connections::*;
+
+mod system;
+pub use system::*;
 
 mod util;
-
-pub struct TrackRef {
-    idx:       u32,
-    seg_start: u16,
-    seg_count: u16,
-}
-
-pub struct TrackStorage {
-    queue:      Vec<TrackQueue>,
-    buffer:     Vec<Vec<TrackBuffer>>,
-    buffer_len: Vec<TrackBufferLength>,
-}

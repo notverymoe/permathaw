@@ -8,5 +8,5 @@ pub use stack::*;
 mod registry;
 pub use registry::*;
 
-#[derive(Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Item(NonZeroU16);
