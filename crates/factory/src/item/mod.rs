@@ -24,7 +24,7 @@ impl Item {
         if let Some(other) = NonZeroU16::new(other.to_raw().get() & 0x0FFF) {
             Self(other)
         } else {
-            panic!("Could not extract item from stack");
+            panic!("Couldn't extract item from stack");
         }
     }
 
