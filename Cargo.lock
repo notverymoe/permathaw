@@ -1614,8 +1614,8 @@ name = "factory"
 version = "0.1.0"
 dependencies = [
  "bevy",
- "bytemuck",
  "nvm_str_id",
+ "smallvec",
 ]
 
 [[package]]
