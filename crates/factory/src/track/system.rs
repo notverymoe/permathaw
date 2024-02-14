@@ -22,15 +22,13 @@ pub fn advance_conveyors(mut q_conveyors: Query<&mut TrackQueue>) {
     }
 }
 
-pub const MASK_INSERT_END: u64 = TrackQueue::from_occupancy_list([TRACK_MAX_ITEMS, TRACK_MAX_ITEMS-1]).to_raw();
-
 #[allow(clippy::missing_panics_doc)]
 pub fn handle_connections(q_connections: Query<&Connection>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for connection in &q_connections {
 
         let can_transfer = {
             let [(src_queue, _), (dst_queue, _)] = q_conveyors.get_many([connection.src, connection.dst]).unwrap();
-            src_queue.has(0) && !dst_queue.has_many(MASK_INSERT_END)
+            connection.can_transfer(src_queue, dst_queue)
         };
 
         if can_transfer {
@@ -77,9 +75,9 @@ mod test {
         let ent1 = app.world.spawn((queue, buffer_with(stack_1))).id();
         let ent2 = app.world.spawn((queue, buffer_with(stack_2))).id();
         let ent3 = app.world.spawn((queue, buffer_with(stack_1))).id();
-        app.world.spawn(Connection{ src: ent1, dst: ent2 }); // 1 loops with 2
-        app.world.spawn(Connection{ src: ent2, dst: ent1 });
-        app.world.spawn(Connection{ src: ent3, dst: ent3 }); // 3 loops with self
+        app.world.spawn(Connection::new_passthrough(ent1, ent2)); // 1 loops with 2
+        app.world.spawn(Connection::new_passthrough(ent2, ent1));
+        app.world.spawn(Connection::new_passthrough(ent3, ent3)); // 3 loops with self
 
         for i in 0..=TRACK_MAX_ITEMS {
             // This will calculate absolute position of item on belt. ie. (60 - n) % 60 -> 1, 0, 59, 58 .. 1

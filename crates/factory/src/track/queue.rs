@@ -40,6 +40,11 @@ impl TrackQueue {
     }
 
     #[must_use]
+    pub const fn can_advance_idx(self, idx: usize) -> bool {
+        (idx != 0) && (self.0 & (u64::MAX >> (63 - (idx+1))) != 0)
+    }
+
+    #[must_use]
     pub const fn from_occupancy_list<const N: usize>(pattern: [usize; N]) -> Self {
         let mut result = 0;
         let mut index  = 0;

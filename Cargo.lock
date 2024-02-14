@@ -1615,7 +1615,6 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "nvm_str_id",
- "smallvec",
 ]
 
 [[package]]
