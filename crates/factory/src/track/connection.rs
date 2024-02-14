@@ -5,12 +5,12 @@ use bevy::prelude::*;
 use super::{TrackQueue, TRACK_MAX_ITEMS};
 
 #[derive(Debug, Clone, Copy, Component, PartialEq, Eq)]
-pub struct Connection {
+pub struct TrackConnection {
     pub dst: Entity,
     pub loc: u8,
 }
 
-impl Connection {
+impl TrackConnection {
 
     #[must_use]
     pub const fn new(dst: Entity, into: usize) -> Self {

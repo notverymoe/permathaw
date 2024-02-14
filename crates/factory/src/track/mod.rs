@@ -8,8 +8,8 @@ pub use queue::*;
 mod buffer;
 pub use buffer::*;
 
-mod connections;
-pub use connections::*;
+mod connection;
+pub use connection::*;
 
 mod system;
 pub use system::*;

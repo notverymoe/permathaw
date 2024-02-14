@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::{Connection, TrackBuffer, TrackQueue, TRACK_MAX_ITEMS};
+use super::{TrackConnection, TrackBuffer, TrackQueue, TRACK_MAX_ITEMS};
 
 pub struct TrackPlugin;
 
@@ -23,7 +23,7 @@ pub fn advance_conveyors(mut q_conveyors: Query<&mut TrackQueue>) {
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_connections(q_connections: Query<(Entity, &Connection)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+pub fn handle_connections(q_connections: Query<(Entity, &TrackConnection)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for (src_ent, connection) in &q_connections {
 
         let can_transfer = {
@@ -52,7 +52,7 @@ mod test {
 
     use crate::{
         item::ItemStack, 
-        track::{Connection, TrackBuffer, TrackQueue, TRACK_MAX_ITEMS}
+        track::{TrackConnection, TrackBuffer, TrackQueue, TRACK_MAX_ITEMS}
     };
 
     use super::TrackPlugin;
@@ -76,9 +76,9 @@ mod test {
         let ent2 = app.world.spawn((queue, buffer_with(stack_2))).id();
         let ent3 = app.world.spawn((queue, buffer_with(stack_1))).id();
 
-        app.world.get_entity_mut(ent1).unwrap().insert(Connection::new_passthrough(ent2)); // 1 loops with 2
-        app.world.get_entity_mut(ent2).unwrap().insert(Connection::new_passthrough(ent1));
-        app.world.get_entity_mut(ent3).unwrap().insert(Connection::new_passthrough(ent3)); // 3 loops with self
+        app.world.get_entity_mut(ent1).unwrap().insert(TrackConnection::new_passthrough(ent2)); // 1 loops with 2
+        app.world.get_entity_mut(ent2).unwrap().insert(TrackConnection::new_passthrough(ent1));
+        app.world.get_entity_mut(ent3).unwrap().insert(TrackConnection::new_passthrough(ent3)); // 3 loops with self
 
         for i in 0..=TRACK_MAX_ITEMS {
             // This will calculate absolute position of item on belt. ie. (60 - n) % 60 -> 1, 0, 59, 58 .. 1
