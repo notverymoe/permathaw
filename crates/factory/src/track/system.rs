@@ -4,7 +4,7 @@ use bevy::prelude::*;
 
 use super::{TrackConnection, TrackBuffer, TrackQueue, TRACK_MAX_ITEMS};
 
-pub struct TrackPlugin;
+pub struct TrackPlugin(bool);
 
 ///
 /// Current issues:
@@ -12,7 +12,12 @@ pub struct TrackPlugin;
 /// 
 impl Plugin for TrackPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, (handle_connections, advance_conveyors).chain());
+        if self.0 {
+            // Multi-threading enabled
+            app.add_systems(Update, (handle_connections, advance_conveyors_mt).chain());
+        } else {
+            app.add_systems(Update, (handle_connections, advance_conveyors).chain());
+        }
     }
 }
 
@@ -20,6 +25,12 @@ pub fn advance_conveyors(mut q_conveyors: Query<&mut TrackQueue>) {
     for mut conveyor in &mut q_conveyors {
         *conveyor = conveyor.next();
     }
+}
+
+pub fn advance_conveyors_mt(mut q_conveyors: Query<&mut TrackQueue>) {
+    q_conveyors.par_iter_mut().for_each(|mut conveyor| {
+        *conveyor = conveyor.next();
+    });
 }
 
 #[allow(clippy::missing_panics_doc)]
@@ -70,7 +81,7 @@ mod test {
         };
 
         let mut app = App::new();
-        app.add_plugins(TrackPlugin);
+        app.add_plugins(TrackPlugin(false));
 
         let ent1 = app.world.spawn((queue, buffer_with(stack_1))).id();
         let ent2 = app.world.spawn((queue, buffer_with(stack_2))).id();
