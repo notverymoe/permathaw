@@ -6,7 +6,6 @@ use super::{TrackQueue, TRACK_MAX_ITEMS};
 
 #[derive(Debug, Clone, Copy, Component, PartialEq, Eq)]
 pub struct Connection {
-    pub src: Entity,
     pub dst: Entity,
     pub loc: u8,
 }
@@ -14,13 +13,13 @@ pub struct Connection {
 impl Connection {
 
     #[must_use]
-    pub const fn new(src: Entity, dst: Entity, into: usize) -> Self {
-        Self{src, dst, loc: (into + 1) as u8}
+    pub const fn new(dst: Entity, into: usize) -> Self {
+        Self{dst, loc: (into + 1) as u8}
     }
 
     #[must_use]
-    pub const fn new_passthrough(src: Entity, dst: Entity) -> Self {
-        Self{src, dst, loc: TRACK_MAX_ITEMS as u8}
+    pub const fn new_passthrough(dst: Entity) -> Self {
+        Self{dst, loc: TRACK_MAX_ITEMS as u8}
     }
 
     #[must_use]

@@ -23,17 +23,17 @@ pub fn advance_conveyors(mut q_conveyors: Query<&mut TrackQueue>) {
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_connections(q_connections: Query<&Connection>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
-    for connection in &q_connections {
+pub fn handle_connections(q_connections: Query<(Entity, &Connection)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+    for (src_ent, connection) in &q_connections {
 
         let can_transfer = {
-            let [(src_queue, _), (dst_queue, _)] = q_conveyors.get_many([connection.src, connection.dst]).unwrap();
+            let [(src_queue, _), (dst_queue, _)] = q_conveyors.get_many([src_ent, connection.dst]).unwrap();
             connection.can_transfer(src_queue, dst_queue)
         };
 
         if can_transfer {
             let item = {
-                let (mut src_queue, mut src_buffer) = q_conveyors.get_mut(connection.src).unwrap();
+                let (mut src_queue, mut src_buffer) = q_conveyors.get_mut(src_ent).unwrap();
                 *src_queue = src_queue.without(0);
                 src_buffer.pop().unwrap()
             };
@@ -75,9 +75,10 @@ mod test {
         let ent1 = app.world.spawn((queue, buffer_with(stack_1))).id();
         let ent2 = app.world.spawn((queue, buffer_with(stack_2))).id();
         let ent3 = app.world.spawn((queue, buffer_with(stack_1))).id();
-        app.world.spawn(Connection::new_passthrough(ent1, ent2)); // 1 loops with 2
-        app.world.spawn(Connection::new_passthrough(ent2, ent1));
-        app.world.spawn(Connection::new_passthrough(ent3, ent3)); // 3 loops with self
+
+        app.world.get_entity_mut(ent1).unwrap().insert(Connection::new_passthrough(ent2)); // 1 loops with 2
+        app.world.get_entity_mut(ent2).unwrap().insert(Connection::new_passthrough(ent1));
+        app.world.get_entity_mut(ent3).unwrap().insert(Connection::new_passthrough(ent3)); // 3 loops with self
 
         for i in 0..=TRACK_MAX_ITEMS {
             // This will calculate absolute position of item on belt. ie. (60 - n) % 60 -> 1, 0, 59, 58 .. 1
