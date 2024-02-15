@@ -45,6 +45,11 @@ impl TrackQueue {
     }
 
     #[must_use]
+    pub const fn get_buffer_index_of(self, idx: usize) -> usize {
+        (self.0 | (u64::MAX << idx)).count_zeros() as usize
+    }
+
+    #[must_use]
     pub const fn from_occupancy_list<const N: usize>(pattern: [usize; N]) -> Self {
         let mut result = 0;
         let mut index  = 0;

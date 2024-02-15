@@ -2,9 +2,9 @@
 
 use bevy::prelude::*;
 
-use super::{TrackConnection, TrackBuffer, TrackQueue, TRACK_MAX_ITEMS};
+use super::{StackBuffer, TrackBuffer, TrackConnection, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS};
 
-pub struct TrackPlugin(bool);
+pub struct TrackPlugin;
 
 ///
 /// Current issues:
@@ -12,12 +12,12 @@ pub struct TrackPlugin(bool);
 /// 
 impl Plugin for TrackPlugin {
     fn build(&self, app: &mut App) {
-        if self.0 {
-            // Multi-threading enabled
-            app.add_systems(Update, (handle_connections, advance_conveyors_mt).chain());
-        } else {
-            app.add_systems(Update, (handle_connections, advance_conveyors).chain());
-        }
+        app.add_systems(Update, (
+            handle_connections,
+            handle_stack_extractors,
+            advance_conveyors,
+            handle_stack_inserters,
+        ).chain());
     }
 }
 
@@ -25,12 +25,6 @@ pub fn advance_conveyors(mut q_conveyors: Query<&mut TrackQueue>) {
     for mut conveyor in &mut q_conveyors {
         *conveyor = conveyor.next();
     }
-}
-
-pub fn advance_conveyors_mt(mut q_conveyors: Query<&mut TrackQueue>) {
-    q_conveyors.par_iter_mut().for_each(|mut conveyor| {
-        *conveyor = conveyor.next();
-    });
 }
 
 #[allow(clippy::missing_panics_doc)]
@@ -49,10 +43,48 @@ pub fn handle_connections(q_connections: Query<(Entity, &TrackConnection)>, mut 
                 src_buffer.pop().unwrap()
             };
 
+            // TODO fix insert location
             let (mut dst_queue, mut dst_buffer) = q_conveyors.get_mut(connection.dst).unwrap();
             *dst_queue = dst_queue.with(TRACK_MAX_ITEMS);
-            dst_buffer.push(item).unwrap();
+            let idx = dst_queue.get_buffer_index_of(connection.loc as usize);
+            dst_buffer.insert(idx, item).unwrap();
         }
+    }
+}
+
+#[allow(clippy::missing_panics_doc)]
+pub fn handle_stack_extractors(mut q_extractors: Query<(&TrackExtractor, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+    for (extractor, mut dst_buffer) in &mut q_extractors {
+        if dst_buffer.contents.is_some() {
+            continue;
+        }
+
+        let (mut src_queue, mut src_buffer) = q_conveyors.get_mut(extractor.target).unwrap();
+        if !src_queue.has(extractor.loc) {
+            continue;
+        }
+
+        let idx = src_queue.get_buffer_index_of(extractor.loc);
+        *src_queue = src_queue.without(extractor.loc);
+        dst_buffer.contents = src_buffer.remove(idx);
+    }
+}
+
+#[allow(clippy::missing_panics_doc)]
+pub fn handle_stack_inserters(mut q_extractors: Query<(&TrackInserter, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+    for (inserter, mut src_buffer) in &mut q_extractors {
+        if src_buffer.contents.is_none() {
+            continue;
+        }
+
+        let (mut dst_queue, mut dst_buffer) = q_conveyors.get_mut(inserter.target).unwrap();
+        if dst_queue.has(inserter.loc) {
+            continue;
+        }
+
+        let idx = dst_queue.get_buffer_index_of(inserter.loc);
+        *dst_queue = dst_queue.with(inserter.loc);
+        dst_buffer.insert(idx, core::mem::take(&mut src_buffer.contents).unwrap()).unwrap();
     }
 }
 
@@ -63,7 +95,7 @@ mod test {
 
     use crate::{
         item::ItemStack, 
-        track::{TrackConnection, TrackBuffer, TrackQueue, TRACK_MAX_ITEMS}
+        track::{StackBuffer, TrackBuffer, TrackConnection, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS}
     };
 
     use super::TrackPlugin;
@@ -81,7 +113,7 @@ mod test {
         };
 
         let mut app = App::new();
-        app.add_plugins(TrackPlugin(false));
+        app.add_plugins(TrackPlugin);
 
         let ent1 = app.world.spawn((queue, buffer_with(stack_1))).id();
         let ent2 = app.world.spawn((queue, buffer_with(stack_2))).id();
@@ -108,6 +140,48 @@ mod test {
         assert_eq!(queue, *app.world.get::<TrackQueue>(ent1).unwrap());
         assert_eq!(queue, *app.world.get::<TrackQueue>(ent2).unwrap());
         assert_eq!(queue, *app.world.get::<TrackQueue>(ent3).unwrap());
+    }
+
+    #[test]
+    pub fn test_self_inserter() {
+        let stack_1 = ItemStack::from_raw(1, 1);
+        let queue  = TrackQueue::default().with(1).with(3);
+
+        let buffer = {
+            let mut buffer = TrackBuffer::default();
+            buffer.push(stack_1).unwrap();
+            buffer.push(stack_1).unwrap();
+            buffer
+        };
+
+        let mut app = App::new();
+        app.add_plugins(TrackPlugin);
+
+        let track = app.world.spawn((queue, buffer)).id();
+        let _mover = app.world.spawn((
+            TrackInserter{
+                target: track,
+                loc:    TRACK_MAX_ITEMS-2
+            },
+            TrackExtractor{
+                target: track,
+                loc: 1,
+            },
+            StackBuffer{
+                contents: None,
+            }
+        )).id();
+
+
+        for i in 0..=TRACK_MAX_ITEMS {
+            println!("{:?}", app.world.get::<TrackQueue>(track).unwrap());
+
+            assert_eq!((i, stack_1), (i, app.world.get::<TrackBuffer>(track).unwrap().get(0).unwrap()));
+            assert_eq!((i, stack_1), (i, app.world.get::<TrackBuffer>(track).unwrap().get(1).unwrap()));
+
+            if i != TRACK_MAX_ITEMS { app.update(); }
+        }
+
     }
 
 }
