@@ -43,7 +43,6 @@ pub fn handle_connections(q_connections: Query<(Entity, &TrackConnection)>, mut 
                 src_buffer.pop().unwrap()
             };
 
-            // TODO fix insert location
             let (mut dst_queue, mut dst_buffer) = q_conveyors.get_mut(connection.dst).unwrap();
             *dst_queue = dst_queue.with(TRACK_MAX_ITEMS);
             let idx = dst_queue.get_buffer_index_of(connection.loc as usize);
