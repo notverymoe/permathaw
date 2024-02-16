@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::{StackBuffer, TrackBuffer, TrackConnection, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS};
+use super::{StackBuffer, TrackBuffer, TrackPassthrough, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS};
 
 pub struct TrackPlugin;
 
@@ -13,10 +13,10 @@ pub struct TrackPlugin;
 impl Plugin for TrackPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Update, (
-            handle_connections,
-            handle_stack_extractors,
+            handle_track_stack_extractors,
+            handle_track_passthrough,
             advance_conveyors,
-            handle_stack_inserters,
+            handle_track_stack_inserters,
         ).chain());
     }
 }
@@ -28,7 +28,7 @@ pub fn advance_conveyors(mut q_conveyors: Query<&mut TrackQueue>) {
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_connections(q_connections: Query<(Entity, &TrackConnection)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+pub fn handle_track_passthrough(q_connections: Query<(Entity, &TrackPassthrough)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for (src_ent, connection) in &q_connections {
 
         let can_transfer = {
@@ -52,7 +52,7 @@ pub fn handle_connections(q_connections: Query<(Entity, &TrackConnection)>, mut 
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_stack_extractors(mut q_extractors: Query<(&TrackExtractor, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+pub fn handle_track_stack_extractors(mut q_extractors: Query<(&TrackExtractor, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for (extractor, mut dst_buffer) in &mut q_extractors {
         if dst_buffer.contents.is_some() {
             continue;
@@ -70,7 +70,7 @@ pub fn handle_stack_extractors(mut q_extractors: Query<(&TrackExtractor, &mut St
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_stack_inserters(mut q_extractors: Query<(&TrackInserter, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+pub fn handle_track_stack_inserters(mut q_extractors: Query<(&TrackInserter, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for (inserter, mut src_buffer) in &mut q_extractors {
         if src_buffer.contents.is_none() {
             continue;
@@ -94,7 +94,7 @@ mod test {
 
     use crate::{
         item::ItemStack, 
-        track::{StackBuffer, TrackBuffer, TrackConnection, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS}
+        track::{StackBuffer, TrackBuffer, TrackPassthrough, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS}
     };
 
     use super::TrackPlugin;
@@ -118,9 +118,9 @@ mod test {
         let ent2 = app.world.spawn((queue, buffer_with(stack_2))).id();
         let ent3 = app.world.spawn((queue, buffer_with(stack_1))).id();
 
-        app.world.get_entity_mut(ent1).unwrap().insert(TrackConnection::new_passthrough(ent2)); // 1 loops with 2
-        app.world.get_entity_mut(ent2).unwrap().insert(TrackConnection::new_passthrough(ent1));
-        app.world.get_entity_mut(ent3).unwrap().insert(TrackConnection::new_passthrough(ent3)); // 3 loops with self
+        app.world.get_entity_mut(ent1).unwrap().insert(TrackPassthrough::new_end_to_end(ent2)); // 1 loops with 2
+        app.world.get_entity_mut(ent2).unwrap().insert(TrackPassthrough::new_end_to_end(ent1));
+        app.world.get_entity_mut(ent3).unwrap().insert(TrackPassthrough::new_end_to_end(ent3)); // 3 loops with self
 
         for i in 0..=TRACK_MAX_ITEMS {
             // This will calculate absolute position of item on belt. ie. (60 - n) % 60 -> 1, 0, 59, 58 .. 1

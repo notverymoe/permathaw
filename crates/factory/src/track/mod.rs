@@ -8,11 +8,8 @@ pub use queue::*;
 mod buffer;
 pub use buffer::*;
 
-mod connection;
-pub use connection::*;
-
-mod translocation;
-pub use translocation::*;
+mod shift;
+pub use shift::*;
 
 mod system;
 pub use system::*;
