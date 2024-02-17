@@ -34,3 +34,15 @@ pub struct SubTick3;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ScheduleLabel)]
 pub struct SubTick4;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
+pub struct TickRate1;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
+pub struct TickRate2;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
+pub struct TickRate3;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Component)]
+pub struct TickRate4;

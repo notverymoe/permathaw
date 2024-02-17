@@ -64,7 +64,7 @@ pub fn test_self_inserter() {
     let mut app = App::new();
     app.add_plugins(PluginsFactory);
 
-    let track = app.world.spawn((queue, buffer)).id();
+    let track = app.world.spawn((queue, buffer, TickRate1)).id();
     let _mover = app.world.spawn((
         TrackInserter{
             target: track,
@@ -76,10 +76,11 @@ pub fn test_self_inserter() {
         },
         StackBuffer{
             contents: None,
-        }
+        },
+        TickRate1
     )).id();
 
-
+    // TODO finish this test
     for i in 0..=TRACK_MAX_ITEMS {
         println!("{:?}", app.world.get::<TrackQueue>(track).unwrap());
 

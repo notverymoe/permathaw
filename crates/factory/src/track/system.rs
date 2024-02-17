@@ -1,17 +1,17 @@
 // Copyright 2024 Natalie Baker // AGPLv3 //
 
-use bevy::prelude::*;
+use bevy::{ecs::query::QueryFilter, prelude::*};
 
 use super::{StackBuffer, TrackBuffer, TrackPassthrough, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS};
 
-pub fn advance_conveyors(mut q_conveyors: Query<&mut TrackQueue>) {
+pub fn advance_conveyors<F: QueryFilter>(mut q_conveyors: Query<&mut TrackQueue, F>) {
     for mut conveyor in &mut q_conveyors {
         *conveyor = conveyor.next();
     }
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_track_passthrough(q_connections: Query<(Entity, &TrackPassthrough)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+pub fn handle_track_passthrough<F: QueryFilter>(q_connections: Query<(Entity, &TrackPassthrough), F>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for (src_ent, connection) in &q_connections {
 
         let can_transfer = {
@@ -35,7 +35,7 @@ pub fn handle_track_passthrough(q_connections: Query<(Entity, &TrackPassthrough)
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_track_stack_extractors(mut q_extractors: Query<(&TrackExtractor, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+pub fn handle_track_stack_extractors<F: QueryFilter>(mut q_extractors: Query<(&TrackExtractor, &mut StackBuffer), F>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for (extractor, mut dst_buffer) in &mut q_extractors {
         if dst_buffer.contents.is_some() {
             continue;
@@ -53,7 +53,7 @@ pub fn handle_track_stack_extractors(mut q_extractors: Query<(&TrackExtractor, &
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_track_stack_inserters(mut q_extractors: Query<(&TrackInserter, &mut StackBuffer)>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
+pub fn handle_track_stack_inserters<F: QueryFilter>(mut q_extractors: Query<(&TrackInserter, &mut StackBuffer), F>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
     for (inserter, mut src_buffer) in &mut q_extractors {
         if src_buffer.contents.is_none() {
             continue;
