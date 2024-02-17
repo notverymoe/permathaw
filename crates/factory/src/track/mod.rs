@@ -14,4 +14,7 @@ pub use shift::*;
 mod system;
 pub use system::*;
 
+mod plugin;
+pub use plugin::*;
+
 mod util;

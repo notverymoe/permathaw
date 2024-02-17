@@ -43,18 +43,16 @@
     // clippy::shadow_unrelated,       // Egui lambda params
 )]
 
-#[derive(Debug, Clone, Copy)]
-pub struct Tick(u32);
-
-impl Tick {
-    #[must_use]
-    pub const fn to_raw(self) -> u32 {
-        self.0
-    }
-}
-
-
 pub mod util;
 pub mod item;
-pub mod belt;
 pub mod track;
+pub mod tick;
+pub mod plugin;
+
+pub mod prelude {
+
+    pub use super::plugin::*;
+    pub use super::item::*;
+    pub use super::track::*;
+
+}
