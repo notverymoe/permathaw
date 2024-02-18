@@ -1661,14 +1661,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "factory"
-version = "0.1.0"
-dependencies = [
- "bevy",
- "nvm_str_id",
-]
-
-[[package]]
 name = "fastrand"
 version = "2.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2565,6 +2557,14 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.49",
+]
+
+[[package]]
+name = "nvm_factory_sim"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "nvm_str_id",
 ]
 
 [[package]]
