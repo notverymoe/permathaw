@@ -4,5 +4,5 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-bevy = { git = "https://github.com/bevyengine/bevy.git", rev = "dd15890c6ab415c32a63da0bc05c52abb8ec2f9e" }
+bevy = "0.13.0"
 nvm_str_id = { git = "https://github.com/notverymoe/nvm-lib.git", rev = "cb0c29035c2964fa5fc3bb350f5afeb58f2710d4" }
