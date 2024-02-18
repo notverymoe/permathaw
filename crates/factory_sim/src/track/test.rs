@@ -4,7 +4,9 @@ use bevy::prelude::*;
 
 use crate::{
     item::ItemStack, 
-    track::{TrackPlugin, StackBuffer, TrackBuffer, TrackPassthrough, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS}
+    plugin::PluginsFactory, 
+    tick::{TickPacer, TickRate1}, 
+    track::{StackBuffer, TrackBuffer, TrackExtractor, TrackInserter, TrackPassthrough, TrackQueue, TRACK_MAX_ITEMS}
 };
 
 #[test]
@@ -20,11 +22,13 @@ pub fn test_conveyor_loop() {
     };
 
     let mut app = App::new();
-    app.add_plugins(TrackPlugin);
+    app.add_plugins(PluginsFactory{
+        pacer: TickPacer::unpaced(),
+    });
 
-    let ent1 = app.world.spawn((queue, buffer_with(stack_1))).id();
-    let ent2 = app.world.spawn((queue, buffer_with(stack_2))).id();
-    let ent3 = app.world.spawn((queue, buffer_with(stack_1))).id();
+    let ent1 = app.world.spawn((queue, buffer_with(stack_1), TickRate1)).id();
+    let ent2 = app.world.spawn((queue, buffer_with(stack_2), TickRate1)).id();
+    let ent3 = app.world.spawn((queue, buffer_with(stack_1), TickRate1)).id();
 
     app.world.get_entity_mut(ent1).unwrap().insert(TrackPassthrough::new_end_to_end(ent2)); // 1 loops with 2
     app.world.get_entity_mut(ent2).unwrap().insert(TrackPassthrough::new_end_to_end(ent1));
@@ -62,7 +66,9 @@ pub fn test_self_inserter() {
     };
 
     let mut app = App::new();
-    app.add_plugins(PluginsFactory);
+    app.add_plugins(PluginsFactory{
+        pacer: TickPacer::unpaced(),
+    });
 
     let track = app.world.spawn((queue, buffer, TickRate1)).id();
     let _mover = app.world.spawn((

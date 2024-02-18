@@ -1,5 +1,6 @@
 [workspace]
 resolver="2"
 members = [
-    "crates/factory_sim"
+    "crates/factory_sim",
+    "crates/factory_dbg"
 ]

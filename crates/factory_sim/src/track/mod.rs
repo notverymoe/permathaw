@@ -18,3 +18,6 @@ mod plugin;
 pub use plugin::*;
 
 mod util;
+
+#[cfg(test)]
+mod test;

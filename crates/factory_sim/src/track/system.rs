@@ -2,7 +2,7 @@
 
 use bevy::{ecs::query::QueryFilter, prelude::*};
 
-use super::{StackBuffer, TrackBuffer, TrackPassthrough, TrackExtractor, TrackInserter, TrackQueue, TRACK_MAX_ITEMS};
+use super::{StackBuffer, TrackBuffer, TrackPassthrough, TrackExtractor, TrackInserter, TrackQueue};
 
 pub fn advance_conveyors<F: QueryFilter>(mut q_conveyors: Query<&mut TrackQueue, F>) {
     for mut conveyor in &mut q_conveyors {
@@ -27,7 +27,7 @@ pub fn handle_track_passthrough<F: QueryFilter>(q_connections: Query<(Entity, &T
             };
 
             let (mut dst_queue, mut dst_buffer) = q_conveyors.get_mut(connection.dst).unwrap();
-            *dst_queue = dst_queue.with(TRACK_MAX_ITEMS);
+            *dst_queue = dst_queue.with(connection.loc as usize);
             let idx = dst_queue.get_buffer_index_of(connection.loc as usize);
             dst_buffer.insert(idx, item).unwrap();
         }

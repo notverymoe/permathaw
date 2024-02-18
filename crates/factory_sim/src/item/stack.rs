@@ -39,7 +39,6 @@ impl ItemStack {
     }
 }
 
-#[cfg(test)]
 impl ItemStack {
 
     /// # Panics

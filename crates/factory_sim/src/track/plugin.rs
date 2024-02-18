@@ -8,9 +8,9 @@ use super::system::{advance_conveyors, handle_track_passthrough, handle_track_st
 
 pub struct PluginTrack;
 
-pub type FilterSubTick1 = (With<TickRate4>, With<TickRate3>, With<TickRate2>, With<TickRate1>);
-pub type FilterSubTick2 = (With<TickRate4>, With<TickRate3>, With<TickRate2>);
-pub type FilterSubTick3 = (With<TickRate4>, With<TickRate3>);
+pub type FilterSubTick1 = Or<(With<TickRate4>, With<TickRate3>, With<TickRate2>, With<TickRate1>)>;
+pub type FilterSubTick2 = Or<(With<TickRate4>, With<TickRate3>, With<TickRate2>)>;
+pub type FilterSubTick3 = Or<(With<TickRate4>, With<TickRate3>)>;
 pub type FilterSubTick4 = With<TickRate4>;
 
 impl Plugin for PluginTrack {

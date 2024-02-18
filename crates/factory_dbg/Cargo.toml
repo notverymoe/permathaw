@@ -1,0 +1,8 @@
+[package]
+name = "nvm_factory_dbg"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = "0.13.0"
+nvm_factory_sim={path="../factory_sim"}

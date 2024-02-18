@@ -2560,6 +2560,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "nvm_factory_dbg"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+ "nvm_factory_sim",
+]
+
+[[package]]
 name = "nvm_factory_sim"
 version = "0.1.0"
 dependencies = [

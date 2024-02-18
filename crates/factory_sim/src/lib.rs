@@ -40,6 +40,7 @@
     clippy::cast_possible_wrap,
     clippy::missing_errors_doc,
     clippy::needless_pass_by_value, // Bevy systems need this
+    clippy::shadow_unrelated,
     // clippy::shadow_unrelated,       // Egui lambda params
 )]
 

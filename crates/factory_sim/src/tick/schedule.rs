@@ -6,14 +6,18 @@ use super::{Tick, TickPacer};
 
 #[allow(clippy::missing_panics_doc)]
 pub fn tick_scheduler(world: &mut World) {
-    let ticks = {
-        let delta = world.get_resource::<Time>().unwrap().delta_seconds_f64();
-        let mut pacer = world.get_resource_mut::<TickPacer>().unwrap();
-        pacer.update(delta)
-    };
+    let pacer = world.get_resource::<TickPacer>().unwrap();
 
-    if ticks == 0 {
-        return;
+    if pacer.is_paced() {
+        let ticks = {
+            let delta = world.get_resource::<Time>().unwrap().delta_seconds_f64();
+            let mut pacer = world.get_resource_mut::<TickPacer>().unwrap();
+            pacer.update(delta)
+        };
+    
+        if ticks == 0 {
+            return;
+        }
     }
 
     world.get_resource_mut::<Tick>().unwrap().advance().unwrap();

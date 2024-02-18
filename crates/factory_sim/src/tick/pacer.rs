@@ -26,12 +26,18 @@ impl TickPacer {
 
 impl TickPacer {
 
+    #[must_use]
     pub fn update(&mut self, delta: f64) -> u32 {
         if self.frame == 0.0 { return 1; }
         self.accum += delta;
         let frames = (self.accum/self.frame).floor() as u32;
         self.accum %= self.frame;
         frames
+    }
+
+    #[must_use]
+    pub fn is_paced(&self) -> bool {
+        self.frame > 0.0
     }
 
 }

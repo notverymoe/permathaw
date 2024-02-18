@@ -61,7 +61,25 @@ impl TrackQueue {
         Self(!result)
     }
 
+    pub const fn iter(&self) -> TrackQueueIter<'_> {
+        TrackQueueIter{
+            idx: 0,
+            queue: self
+        }
+    }
+
 }
+
+impl<'a> IntoIterator for &'a TrackQueue {
+    type Item = usize;
+
+    type IntoIter = TrackQueueIter<'a>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 
 impl Default for TrackQueue {
     fn default() -> Self {
@@ -75,7 +93,8 @@ impl core::fmt::Debug for TrackQueue {
     }
 }
 
-struct TrackQueueIter<'a> {
+#[must_use]
+pub struct TrackQueueIter<'a> {
     queue: &'a TrackQueue,
     idx:   usize,
 }
