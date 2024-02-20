@@ -11,6 +11,12 @@ pub use plugin::*;
 mod schedule;
 pub use schedule::*;
 
+mod cooldown;
+pub use cooldown::*;
+
+mod system;
+pub use system::*;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Resource)]
 pub struct Tick(u32);
 
@@ -28,6 +34,11 @@ impl Tick {
         } else {
             Err("Overflow on tick advance.")
         }
+    }
+
+    #[must_use]
+    pub const fn to_raw(self) -> u32 {
+        self.0
     }
 
 }

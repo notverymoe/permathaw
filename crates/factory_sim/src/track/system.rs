@@ -2,7 +2,8 @@
 
 use bevy::{ecs::query::QueryFilter, prelude::*};
 
-use super::{StackBuffer, TrackBuffer, TrackPassthrough, TrackExtractor, TrackInserter, TrackQueue};
+use crate::tick::{Cooldown, Tick};
+use super::{StackBuffer, TrackBuffer, TrackExtractor, TrackInserter, TrackPassthrough, TrackQueue};
 
 pub fn advance_conveyors<F: QueryFilter>(mut q_conveyors: Query<&mut TrackQueue, F>) {
     for mut conveyor in &mut q_conveyors {
@@ -35,8 +36,13 @@ pub fn handle_track_passthrough<F: QueryFilter>(q_connections: Query<(Entity, &T
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_track_stack_extractors<F: QueryFilter>(mut q_extractors: Query<(&TrackExtractor, &mut StackBuffer), F>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
-    for (extractor, mut dst_buffer) in &mut q_extractors {
+pub fn handle_track_stack_extractors<F: QueryFilter>(
+    mut q_extractors: Query<(Entity, &TrackExtractor, &mut StackBuffer), (Without<Cooldown>, F)>, 
+    mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>,
+    mut commands: Commands,
+    tick: Res<Tick>,
+) {
+    for (id, extractor, mut dst_buffer) in &mut q_extractors {
         if dst_buffer.contents.is_some() {
             continue;
         }
@@ -49,12 +55,20 @@ pub fn handle_track_stack_extractors<F: QueryFilter>(mut q_extractors: Query<(&T
         let idx = src_queue.get_buffer_index_of(extractor.loc);
         *src_queue = src_queue.without(extractor.loc);
         dst_buffer.contents = src_buffer.remove(idx);
+        if extractor.cooldown > 0 {
+            commands.entity(id).insert(Cooldown::new(*tick, extractor.cooldown));
+        }
     }
 }
 
 #[allow(clippy::missing_panics_doc)]
-pub fn handle_track_stack_inserters<F: QueryFilter>(mut q_extractors: Query<(&TrackInserter, &mut StackBuffer), F>, mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>) {
-    for (inserter, mut src_buffer) in &mut q_extractors {
+pub fn handle_track_stack_inserters<F: QueryFilter>(
+    mut q_extractors: Query<(Entity, &TrackInserter, &mut StackBuffer), (Without<Cooldown>, F)>, 
+    mut q_conveyors: Query<(&mut TrackQueue, &mut TrackBuffer)>,
+    mut commands: Commands,
+    tick: Res<Tick>,
+) {
+    for (id, inserter, mut src_buffer) in &mut q_extractors {
         if src_buffer.contents.is_none() {
             continue;
         }
@@ -67,5 +81,8 @@ pub fn handle_track_stack_inserters<F: QueryFilter>(mut q_extractors: Query<(&Tr
         let idx = dst_queue.get_buffer_index_of(inserter.loc);
         *dst_queue = dst_queue.with(inserter.loc);
         dst_buffer.insert(idx, core::mem::take(&mut src_buffer.contents).unwrap()).unwrap();
+        if inserter.cooldown > 0 {
+            commands.entity(id).insert(Cooldown::new(*tick, inserter.cooldown));
+        }
     }
 }

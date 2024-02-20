@@ -32,14 +32,16 @@ impl TrackPassthrough {
 
 #[derive(Debug, Clone, Copy, Component)]
 pub struct TrackExtractor {
-    pub target: Entity,
-    pub loc:    usize,
+    pub target:   Entity,
+    pub loc:      usize,
+    pub cooldown: u32,
 }
 
 #[derive(Debug, Clone, Copy, Component)]
 pub struct TrackInserter {
-    pub target: Entity,
-    pub loc:    usize,
+    pub target:   Entity,
+    pub loc:      usize,
+    pub cooldown: u32,
 }
 
 #[derive(Debug, Clone, Copy, Component)]

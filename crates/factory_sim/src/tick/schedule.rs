@@ -21,11 +21,15 @@ pub fn tick_scheduler(world: &mut World) {
     }
 
     world.get_resource_mut::<Tick>().unwrap().advance().unwrap();
+    world.run_schedule(PreTick);
     world.run_schedule(SubTick1);
     world.run_schedule(SubTick2);
     world.run_schedule(SubTick3);
     world.run_schedule(SubTick4);
 }
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ScheduleLabel)]
+pub struct PreTick;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, ScheduleLabel)]
 pub struct SubTick1;

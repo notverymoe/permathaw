@@ -74,11 +74,13 @@ pub fn test_self_inserter() {
     let _mover = app.world.spawn((
         TrackInserter{
             target: track,
-            loc:    TRACK_MAX_ITEMS-2
+            loc:    TRACK_MAX_ITEMS-2,
+            cooldown: 0,
         },
         TrackExtractor{
             target: track,
             loc: 1,
+            cooldown: 0,
         },
         StackBuffer{
             contents: None,

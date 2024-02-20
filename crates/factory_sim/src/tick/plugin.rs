@@ -2,7 +2,7 @@
 
 use bevy::prelude::*;
 
-use super::{tick_scheduler, SubTick1, SubTick2, SubTick3, SubTick4, Tick, TickPacer};
+use super::{tick_scheduler, update_cooldowns, PreTick, SubTick1, SubTick2, SubTick3, SubTick4, Tick, TickPacer};
 
 pub struct PluginTick(TickPacer);
 
@@ -26,10 +26,12 @@ impl Plugin for PluginTick {
         bevy_app
             .insert_resource(self.0)
             .insert_resource(Tick::new(0))
+            .add_schedule(Schedule::new(PreTick))
             .add_schedule(Schedule::new(SubTick1))
             .add_schedule(Schedule::new(SubTick2))
             .add_schedule(Schedule::new(SubTick3))
             .add_schedule(Schedule::new(SubTick4))
-            .add_systems(Update, tick_scheduler);
+            .add_systems(Update, tick_scheduler)
+            .add_systems(PreTick, update_cooldowns);
     }
 }

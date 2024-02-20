@@ -115,7 +115,7 @@ fn setup(mut commands: Commands) {
 
 
     let id_c = commands.spawn((
-        TickRate4,
+        TickRate1,
         ConveyorPath::new(
             vec![
                 Vec2::Y * 60.0 * 10.0 + Vec2::X * 60.0 * 10.0,
