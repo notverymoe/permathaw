@@ -45,7 +45,7 @@
 
 use bevy::prelude::*;
 use nvm_factory_dbg::{render_debug_conveyors, ConveyorPath};
-use nvm_factory_sim::{item::ItemStack, plugin::PluginsFactory, tick::{TickPacer, TickRate1, TickRate4}, track::{TrackBuffer, TrackPassthrough, TrackQueue}};
+use nvm_factory_sim::{item::ItemStack, plugin::PluginsFactory, tick::{TickPacer, TickRate1}, track::{TrackBuffer, TrackPassthrough, TrackQueue}};
 
 pub fn main() {
     App::new()
