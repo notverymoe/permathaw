@@ -48,6 +48,7 @@ pub mod util;
 pub mod item;
 pub mod track;
 pub mod tick;
+pub mod power;
 pub mod plugin;
 
 pub mod prelude {
