@@ -3,6 +3,9 @@ name = "nvm_factory_dbg"
 version = "0.1.0"
 edition = "2021"
 
+[lints]
+workspace=true
+
 [dependencies]
 bevy = { version = "0.13.0", features = ["dynamic_linking"] }
-nvm_factory_sim={path="../factory_sim"}
+nvm_factory_sim={ path="../factory_sim" }

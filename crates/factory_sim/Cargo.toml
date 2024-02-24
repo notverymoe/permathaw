@@ -3,6 +3,9 @@ name = "nvm_factory_sim"
 version = "0.1.0"
 edition = "2021"
 
+[lints]
+workspace=true
+
 [dependencies]
 bevy = { version = "0.13.0", features = ["dynamic_linking"] }
 nvm_str_id = { git = "https://github.com/notverymoe/nvm-lib.git", rev = "cb0c29035c2964fa5fc3bb350f5afeb58f2710d4" }
