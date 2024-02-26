@@ -1,0 +1,11 @@
+[package]
+name = "factory_sandbox"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+bevy = { version = "0.13.0", features = ["dynamic_linking"] }
+nvm_factory_sim={ path="../factory_sim" }
+
+[lints]
+workspace = true
